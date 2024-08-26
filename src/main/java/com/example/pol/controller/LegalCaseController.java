@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cases")
@@ -28,12 +29,19 @@ public class LegalCaseController {
 
 
     @PostMapping
-    public ResponseEntity<String> saveCase(@RequestBody LegalCaseRequest legalCaseRequest) {
+    public ResponseEntity<String> saveCase(@RequestBody Map<String, Object> jsonRequest) {
+        if (!jsonRequest.containsKey("caseNumber")) {
+            return new ResponseEntity<>("Tipo inválido, o cadastro deve ser exatamente como o exemplo: {\"caseNumber\": 12535}.", HttpStatus.BAD_REQUEST);
+        }
+
         try {
-            legalCaseService.saveCase(String.valueOf(legalCaseRequest.getCaseNumber()));
+            int caseNumber = (Integer) jsonRequest.get("caseNumber");
+            legalCaseService.saveCase(String.valueOf(caseNumber));
             return new ResponseEntity<>("Processo criado com êxito.", HttpStatus.CREATED);
         } catch (CaseAlreadyExistsException ex) {
-            return new ResponseEntity<>("Processo de número " + legalCaseRequest.getCaseNumber() + " não existe.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Processo de número " + jsonRequest.get("caseNumber") + " não existe.", HttpStatus.BAD_REQUEST);
+        } catch (ClassCastException ex) {
+            return new ResponseEntity<>("'caseNumber' possui valor inválido. Deve ser um número inteiro.", HttpStatus.BAD_REQUEST);
         }
     }
 
