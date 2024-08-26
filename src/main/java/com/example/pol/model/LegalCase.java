@@ -18,6 +18,7 @@ public class LegalCase {
 
     @OneToMany(mappedBy = "legalCase", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
+    @OrderBy("id ASC")
     private Set<Defendant> defendants = new HashSet<>();
 
     // Default constructor
